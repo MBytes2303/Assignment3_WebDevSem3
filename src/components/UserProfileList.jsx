@@ -1,16 +1,29 @@
-import React from 'react';
-import UserProfile from './UserProfile';
+import React, { useState } from "react";
+import UserProfile from "./UserProfile";
 
 function UserProfileList({ profiles }) {
-  // ToDo: Render a list of UserProfile components based on the profiles prop
+  const [filterText, setFilterText] = useState("");
+
+  const filteredProfiles = profiles.filter(
+    (profile) =>
+      profile.name.toLowerCase().includes(filterText.toLowerCase()) ||
+      profile.email.toLowerCase().includes(filterText.toLowerCase())
+  );
+
   return (
-    <div className="space-y-4">
-      {/* Render UserProfile components here */}
-      {/* Hint 
-        {*********.map((profile, index) => (
-        <********* key={index} profile={profile} />
-        ))} 
-      */}
+    <div className="text-center mb-4">
+      <h1 className="text-center text-3xl font-bold mb-8">User Profile List</h1>
+      <input
+        type="text"
+        value={filterText}
+        onChange={(e) => setFilterText(e.target.value)}
+        placeholder="Search by name or email..."
+        className="p-2 border rounded-md mb-5"
+      />
+
+      {filteredProfiles.map((profile, index) => (
+        <UserProfile key={index} profile={profile} />
+      ))}
     </div>
   );
 }

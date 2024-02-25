@@ -6,57 +6,50 @@ function UserForm({ onAddProfile }) {
     email: "",
     bio: "",
   });
-  const [errors, setErrors] = useState({
-    name: "",
-    email: "",
-    bio: "",
-  });
+  const [errors, setErrors] = useState({});
 
   const handleInputChange = (e) => {
-    // destructures the event object that passes through this function
-    // e.target contains the object containing all of the attributes from the html element
-    // the name attribute will be assigned to the name variable, so whenever this function is called
-    // it will change dynamically and appropriately change the value in the proper element in the array.
     const { name, value } = e.target;
-
-    setProfile({
-      ...profile, // 'spreads' the current profile so the changes will append. If this is not written, changes will not be saved on the other fields
+    setProfile((prevProfile) => ({
+      ...prevProfile,
       [name]: value,
-    });
+    }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = {};
+    if (!profile.name.trim()) {
+      newErrors.name = "Name is required";
+      isValid = false;
+    }
+    if (!profile.email.trim()) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) {
+      newErrors.email = "Invalid email format";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // ToDo: Implement form validation before submission
-    // If valid, call onAddProfile with the new profile and reset form fields
-    // Otherwise, set errors in state to display validation messages
 
-    if (/\d/.test(profile.name)) {
-      setErrors({ name: "Numbers are not allowed." });
-      return;
+    if (validateForm()) {
+      onAddProfile(profile);
+      setProfile({
+        name: "",
+        email: "",
+        bio: "",
+      });
     }
-
-    if (!profile.email.includes("@")) {
-      setErrors({ email: "Needs an '@' symbol." });
-      return;
-    }
-
-    if (profile.bio.length > 200) {
-      setErrors({ bio: "Bio is too long." });
-      return;
-    }
-
-    onAddProfile(profile);
-    setErrors({
-      name: "",
-      email: "",
-      bio: "",
-    });
-    setProfile({
-      name: "",
-      email: "",
-      bio: "",
-    });
   };
 
   return (
@@ -75,11 +68,15 @@ function UserForm({ onAddProfile }) {
             id="name"
             value={profile.name}
             onChange={handleInputChange}
-            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className={`mt-1 block w-full px-3 py-2 bg-white border ${
+              errors.name ? "border-red-500" : "border-gray-300"
+            } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
             placeholder="John Doe"
           />
+          {errors.name && (
+            <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+          )}
         </div>
-        <span className="text-sm font-bold text-red-600">{errors.name}</span>
         <div>
           <label
             htmlFor="email"
@@ -93,11 +90,15 @@ function UserForm({ onAddProfile }) {
             id="email"
             value={profile.email}
             onChange={handleInputChange}
-            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className={`mt-1 block w-full px-3 py-2 bg-white border ${
+              errors.email ? "border-red-500" : "border-gray-300"
+            } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
             placeholder="johndoe@example.com"
           />
+          {errors.email && (
+            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+          )}
         </div>
-        <span className="text-sm font-bold text-red-600">{errors.email}</span>
         <div>
           <label
             htmlFor="bio"
@@ -115,7 +116,6 @@ function UserForm({ onAddProfile }) {
             placeholder="A short bio..."
           ></textarea>
         </div>
-        <span className="text-sm font-bold text-red-600">{errors.bio}</span>
         <button
           type="submit"
           className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
